@@ -1,0 +1,12 @@
+dn: o=test, o=ok
+objectClass: top
+objectClass: organization
+o: test
+
+dn: cn=admin,o=test,o=ok
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword:: e1NTSEF9Y1lkTW5SUEtvajgzMDJTZlVwNWoyM2J5Z0h5azVFS0k=
+structuralObjectClass: organizationalRole

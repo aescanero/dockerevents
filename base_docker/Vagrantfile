@@ -1,0 +1,54 @@
+# -*- mode: ruby -*-
+
+dir = File.dirname(File.expand_path(__FILE__))
+VAGRANTFILE_API_VERSION = "2"
+
+#Script definitions
+$swapfile = <<SCRIPT
+if ! grep swapfile /etc/fstab >/dev/null
+then
+  fallocate -l 1024M /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+fi
+SCRIPT
+
+$docker = <<SCRIPT
+if ! [ -f /usr/bin/docker ]
+then
+
+  curl -sSL https://get.docker.com/ | sh #Production Release
+#curl -fsSL https://test.docker.com/ | sh #Test Release
+#curl -fsSL https://experimental.docker.com/ | sh #Experimental Release
+
+  mkdir -p /etc/docker/ssl
+  cp -f /home/ubuntu/docker/ssl/script_ssl.sh /etc/docker/ssl
+  cp -f /home/ubuntu/docker/ssl/openssl.cnf /etc/docker/ssl
+  cd /etc/docker/ssl && ./script_ssl.sh
+  cat /home/ubuntu/docker/docker.service >/lib/systemd/system/docker.service
+  systemctl daemon-reload
+  systemctl restart docker
+fi
+SCRIPT
+
+# Create base box
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.ssh.insert_key = true
+  config.ssh.username = "ubuntu"
+  config.vm.hostname = "base-docker"
+  config.vm.box = "ubuntu/yakkety64"
+  config.vm.synced_folder "./docker", "/home/ubuntu/docker"
+  config.vm.network "private_network", ip: "192.168.8.200"
+  config.vm.provider :virtualbox do |v|
+    v.cpus = 1
+    v.memory = 512
+  end
+  config.vm.provision :shell, inline: $swapfile
+  config.vm.provision :shell, inline: "add-apt-repository -y ppa:gluster/glusterfs-3.9"
+  config.vm.provision :shell, inline: $docker
+  config.vm.provision :shell, inline: "apt-get remove --purge -y unattended-upgrades"
+  config.vm.provision :shell, inline: "apt-get --purge remove -y linux-headers-* linux-image-virtual python3-update-manager snapd"
+  config.vm.provision :shell, inline: "apt-get install -y python-pip && pip install --upgrade pip && pip install docker-compose"
+  config.vm.provision :shell, inline: "apt-get clean && apt-get install -yd glusterfs-server libnss-mdns"
+end

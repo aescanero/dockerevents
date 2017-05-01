@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<dom-module id="menu-panel">
+  <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+  <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+  <template id="app">
+    <link rel="stylesheet" href="menu-panel.css" type="text/css" charset="utf-8">
+    <div class="vertical-end-justified listwidth">
+      <div role="listbox">
+        <paper-icon-item id="dockerConfigure"><iron-icon icon="send" item-icon></iron-icon>Configure</paper-icon-item>
+      </div>
+      <div role="listbox">
+        <paper-icon-item id="dockerMonitor"><iron-icon icon="send" item-icon></iron-icon>Monitor</paper-icon-item>
+      </div>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'menu-panel',
+      properties: {
+      },
+      ready: function(){
+      },
+      errorHandler: function(request){
+        console.log(request.detail.response);
+      },
+    });
+  </script>
+
+</dom-module>

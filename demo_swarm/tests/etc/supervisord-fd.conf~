@@ -1,0 +1,28 @@
+[supervisord]
+logfile = /data/logs/supervisord.log
+logfile_maxbytes = 50MB
+logfile_backups=10
+loglevel = info
+pidfile = /data/pids/supervisord.pid
+nodaemon = true
+minfds = 1024
+minprocs = 200
+umask = 022
+identifier = supervisor
+directory = /tmp
+nocleanup = true
+childlogdir = /tmp
+strip_ansi = false
+
+[program:apache]
+command=apachectl -c "ErrorLog /dev/stdout" -DFOREGROUND
+autostart=true
+autorestart=true
+startretries=1
+startsecs=1
+redirect_stderr=true
+stderr_logfile=/var/log/myapache.err.log
+stdout_logfile=/var/log/myapache.out.log
+user=root
+killasgroup=true
+stopasgroup=true

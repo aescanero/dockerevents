@@ -1,0 +1,54 @@
+
+div[role="listbox"] {
+  border: 1px solid #e5e5e5;
+}
+
+.avatar {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--paper-red-500);
+}
+
+.blue {
+  color: #272E69;
+}
+
+.red {
+  color: #E24040;
+}
+
+.ok {
+  color: #272E69;
+}
+
+.warning {
+  color: #E24040;
+}
+
+.alert {
+  color: #E24040;
+}
+
+
+.vertical-section-container {
+    @apply(--layout-vertical);
+    @apply(--center-justified);
+  }
+
+.listwidth {
+     max-width: 300px;
+     margin-left: auto;
+   }
+
+.horizontal-end-justified {
+   @apply(--layout-horizontal);
+   @apply(--layout-end);
+ }
+
+ .vertical-end-justified {
+    @apply(--layout-vertical);
+    @apply(--layout-end);
+  }

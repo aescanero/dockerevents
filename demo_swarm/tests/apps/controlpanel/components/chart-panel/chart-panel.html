@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<dom-module id="chart-panel">
+  <template id="app">
+  <iron-ajax id="apiquery"
+      handle-as="json"
+      content-type="application/json"
+      last-response="{{jsondata}}"
+      on-response="checkResponse"
+      on-error="errorHandler"
+      debounce-duration="300"
+      verbose="true"></iron-ajax>
+    <link rel="stylesheet" href="chart-panel.css" type="text/css" charset="utf-8">
+    <link rel="import" href="../../bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+    <link rel="import" href="../../bower_components/chart-elements/chart-elements.html">
+    <chart-line id="chart" class="rectangular-chart" data="[[data]]"></chart-line>
+  </template>
+  <script>
+    Polymer({
+      is: 'chart-panel',
+      properties: {
+        data: Object
+      },
+      checkResponse: function(request) {
+        console.log(request);
+        var res = request.detail.response;
+        var containers = res.data;
+        for (var i = 0; i < containers.length; i++){
+          var id = containers[i].id;
+          var color = 100 + (id * 5);
+//          this.push('data.labels', '');
+          this.shift('data.datasets.' + id + '.data');
+          this.push('data.datasets.' + id + '.data', containers[i].runningq);
+        }
+        var that = this;
+        setTimeout(function(){
+          that.$.apiquery.generateRequest();
+        }, 5000);
+      },
+      ready: function(){
+        this.$.apiquery.url="http://" + location.host + "/api/active";
+        this.$.apiquery.generateRequest();
+        var datasets = [];
+        for (var i=0;i<15;i++){
+          var color = 100 + (i*5);
+          datasets[i]={
+            label: [],
+            backgroundColor: "rgba(220," + color + ",220,0.2)",
+            borderColor: "rgba(220," + color + ",220,0.1)",
+            borderWidth: 1,
+            pointBackgroundColor: "rgba(220," + color + ",220,0.1)",
+            pointBorderColor: "#fff",
+            pointHoverBackgroundColor: "#fff",
+            pointHoverBorderColor: "rgba(220," + color + ",220,0.1)",
+            data: []
+          };
+          for (var j=0;j<5;j++){
+            datasets[i].label.push("");
+            datasets[i].data.push(0);
+          }
+        }
+        this.data = {
+          labels: [],
+          datasets
+        }
+      },
+      errorHandler: function(request){
+        console.log(request.detail.response);
+      }
+    });
+  </script>
+</dom-module>

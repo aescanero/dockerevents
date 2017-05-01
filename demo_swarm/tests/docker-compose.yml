@@ -1,0 +1,50 @@
+version: '3.1'
+services:
+  ldap:
+    image: localhost:5000/myproject:ldap_fusiondirecty_alpine
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - engine.labels.myproject.service == be
+      resources:
+        limits:
+          cpus: '0.001'
+          memory: 100M
+        reservations:
+          cpus: '0.0001'
+          memory: 50M
+    networks:
+      - be
+
+  fd:
+    image: localhost:5000/myproject:fusiondirecty_debian
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - engine.labels.myproject.service == fe
+      resources:
+        limits:
+          cpus: '0.001'
+          memory: 300M
+        reservations:
+          cpus: '0.0001'
+          memory: 200M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - fe
+      - be
+    ports:
+      - "3100:80"
+    tty: true
+networks:
+  fe:
+  be:

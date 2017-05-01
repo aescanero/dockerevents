@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<dom-module id="base-panel">
+  <link rel="stylesheet" href="base-panel.css" type="text/css" charset="utf-8">
+  <template id="app">
+    <iron-ajax id="apibasequery"
+        handle-as="json"
+        content-type="application/json"
+        last-response="{{jsondata}}"
+        on-response="checkResponse"
+        on-error="errorHandler"
+        debounce-duration="300"
+        verbose="true"></iron-ajax>
+    <span>Title: {{apititle}}</span>
+  </template>
+  <script>
+    Polymer({
+      is: 'base-panel',
+      properties: {
+        Servidor: String,
+        Puerto: Number,
+        apititle: String
+      },
+      ready: function(){
+        this.Servidor="localhost";
+        this.Puerto="80";
+        this.apititle="TEST";
+        this.$.apibasequery.url="http://" + location.host + "/api/hello";
+        this.$.apibasequery.generateRequest();
+      },
+      errorHandler: function(request){
+        console.log(request.detail.response);
+      },
+      checkResponse: function(request) {
+        console.log(request);
+        data = request.detail.response;
+        this.apititle = data.data;
+        console.log(JSON.stringify(request.detail.response));
+        console.log(data.data);
+      }
+    });
+  </script>
+
+</dom-module>

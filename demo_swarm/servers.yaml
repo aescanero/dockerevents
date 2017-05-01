@@ -1,0 +1,76 @@
+---
+-
+  box: elasticmmldap/base_docker
+  cpu: 1
+  ip: "192.168.8.2"
+  name: swarm-master-1
+  forward_ports:
+      - { guest: 3000, host: 3001 }
+      - { guest: 3100, host: 3002 }
+      - { guest: 3200, host: 3003 }
+  ram: 512
+  shell_commands:
+    - { shell: 'service docker reload' }
+    - { shell: 'docker swarm init --advertise-addr "192.168.8.2" --listen-addr "192.168.8.2:2377"|grep -- "--token"|sed "s/^\s*//"|cut -d" " -f 2|grep -v ^$|tr "\n" " ">/home/ubuntu/tests/key.node' }
+    - { shell: 'docker swarm join-token manager |grep -- "--token"|sed "s/^\s*//"|cut -d" " -f 2|grep -v ^$|tr "\n" " ">/home/ubuntu/tests/key.manager' }
+-
+  box: elasticmmldap/base_docker
+  cpu: 1
+  ip: "192.168.8.3"
+  name: swarm-master-2
+  forward_ports:
+      - { guest: 3000, host: 3004 }
+      - { guest: 3100, host: 3005 }
+      - { guest: 3200, host: 3006 }
+  ram: 512
+  shell_commands:
+    - { shell: 'service docker reload' }
+    - { shell: 'key=`cat /home/ubuntu/tests/key.manager|cut -d\  -f 1`;docker swarm join --advertise-addr "192.168.8.3" --listen-addr "192.168.8.3:2377" --token $key 192.168.8.2' }
+-
+  box: elasticmmldap/base_docker
+  cpu: 1
+  ip: "192.168.8.100"
+  name: swarm-node-1
+  forward_ports:
+      - { guest: 3000, host: 3007 }
+      - { guest: 3100, host: 3008 }
+      - { guest: 3200, host: 3009 }
+  ram: 256
+  shell_commands:
+    - { shell: 'service docker reload' }
+    - { shell: 'key=`cat /home/ubuntu/tests/key.node|cut -d\  -f 1`;docker swarm join --token $key 192.168.8.2' }
+    - { shell: 'apt-get install nfs-server' }
+-
+  box: elasticmmldap/base_docker
+  cpu: 1
+  ip: "192.168.8.101"
+  name: swarm-node-2
+  forward_ports:
+      - { guest: 3000, host: 3010 }
+      - { guest: 3100, host: 3011 }
+      - { guest: 3200, host: 3012 }
+  ram: 256
+  shell_commands:
+    - { shell: 'service docker reload' }
+    - { shell: 'key=`cat /home/ubuntu/tests/key.node|cut -d\  -f 1`;docker swarm join --token $key 192.168.8.2' }
+    - { shell: 'apt-get install nfs-server' }
+-
+  box: elasticmmldap/base_docker
+  cpu: 1
+  ip: "192.168.8.102"
+  name: swarm-node-3
+  forward_ports:
+      - { guest: 3000, host: 3013 }
+      - { guest: 3100, host: 3014 }
+      - { guest: 3200, host: 3015 }
+  ram: 256
+  shell_commands:
+    - { shell: 'service docker reload' }
+    - { shell: 'key=`cat /home/ubuntu/tests/key.node|cut -d\  -f 1`;docker swarm join --token $key 192.168.8.2' }
+    - { shell: 'apt-get install nfs-server' }
+    - { shell: 'gluster peer probe 192.168.8.100' }
+    - { shell: 'gluster peer probe 192.168.8.101' }
+    - { shell: 'gluster peer probe 192.168.8.102' }
+    - { shell: 'sleep 30' }
+    - { shell: 'gluster volume create persistent-storage disperse 3 redundancy 1 transport tcp 192.168.8.100:/glusterfs 192.168.8.101:/glusterfs swarm-node-3:/glusterfs force' }
+    - { shell: 'gluster volume start persistent-storage' }

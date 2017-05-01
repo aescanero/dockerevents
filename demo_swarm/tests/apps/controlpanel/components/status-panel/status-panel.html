@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<dom-module id="status-panel">
+  <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+  <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+  <link rel="import" href="../../bower_components/paper-range-slider/paper-range-slider.html">
+  <link rel="import" href="../chart-panel/chart-panel.html">
+  <template id="app">
+    <link rel="stylesheet" href="status-panel.css" type="text/css" charset="utf-8">
+    <style is="custom-style">
+      red {
+        background-color: var(--paper-light-red-300);
+      }
+    </style>
+    <iron-ajax id="apiquery"
+        params="{'alt':'json', 'q':'chrome'}"
+        handle-as="json"
+        content-type="application/json"
+        last-response="{{jsondata}}"
+        on-response="checkResponse"
+        on-error="errorHandler"
+        debounce-duration="300"
+        verbose="true"></iron-ajax>
+        <div class="vertical-end-justified">
+          <chart-panel></chart-panel>
+          <paper-range-slider always-show-pin step="1" value-diff-min="3" value-max="10" max="15" min="3"></paper-range-slider>
+          <paper-range-slider always-show-pin step="1" value-diff-min="3" value-max="10" max="15" min="3"></paper-range-slider>
+        </div>
+        <div class="vertical-end-justified listwidth">
+          <div role="listbox">
+            <paper-icon-item id="itemStatus" class="{{stateName}}"><iron-icon icon="error" item-icon></iron-icon>State: {{stateName}}</paper-icon-item>
+            <template is="dom-repeat" id="nodeState" items="{{nodeStates}}">
+               <paper-icon-item id="itemNode{{index}}" class="{{item.nodeState}}"><iron-icon icon="{{item.nodeState}}" item-icon></iron-icon>Node: {{item.nodeName}}: {{item.nodeAddress}}</paper-icon-item>
+            </template>
+            <template is="dom-repeat" id="serviceState" items="{{serviceStates}}">
+               <paper-icon-item id="itemService{{index}}" class="{{serviceStateName}}"><iron-icon icon="error" item-icon></iron-icon>Service: {{item.serviceName}}</paper-icon-item>
+            </template>
+          </div>
+        </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'status-panel',
+      properties: {
+        stateName: {
+          type: String,
+          value: "check",
+          notify: true
+        },
+        nodeStates: {
+          type: Array,
+          value: function(){
+            return [];
+          }
+        }
+      },
+      ready: function(){
+        this.stateName="check";
+        this.serviceStates = [];
+        this.nodeStates=[{nodeState: "alert", nodeName: "test", nodeAddress: "test"}];
+      },
+      errorHandler: function(request){
+        console.log(request.detail.response);
+      },
+      checkResponse: function(request) {
+        console.log(request);
+        // state = request.detail.response.state[0];
+        ref = request.detail.response.ref[0];
+        // data = request.detail.response.data[0];
+        if (this[ref]==undefined){
+          console.log("Function: " + ref + " isn't found");
+        }else{
+          console.log("Execute function: " + ref);
+          this[ref](request);
+        }
+      },
+      api_check: function(request) {
+        console.log(data.state);
+        switch (request.detail.response.state[0]) {
+          case 2:<!-- error: icon "error" -->
+            this.stateName="alert";
+            this.nodeStates = [];
+            this.serviceStates = [];
+            break;
+          case 1:<!-- warning: icon "warning" -->
+            this.stateName="warning";
+            this.nodeStates = [];
+            this.serviceStates = [];
+            break;
+          default:<!-- check: icon "check" -->
+            this.$.apiquery.url="http://" + location.host + "/api/hosts/ls";
+            this.$.apiquery.generateRequest();
+        }
+        this.stateName="check";
+        this.$.itemStatus.setAttribute('icon', this.stateName);
+        this.toggleClass(this.stateName,true,this.$.itemStatus);
+        // console.log(JSON.stringify(request.detail.response));
+        // console.log(data.data);
+      },
+      api_hosts_ls: function(request) {
+        switch (request.detail.response.state[0]) {
+          case 2:
+            this.stateName="alert";
+            this.nodeStates = [];
+            this.serviceStates = [];
+            break;
+          case 1:
+            this.stateName="warning";
+            this.nodeStates = [];
+            this.serviceStates = [];
+            break;
+          default:
+            this.nodeStates = [];
+            for (let element of request.detail.response.data[0]){
+              var address = element.Address;
+              var nodename = element.Node;
+              this.$.apiquery.url="http://" + location.host + "/api/hosts/info?ip=" + address + "&node=" + nodename;
+              console.log("test: "+this.$.apiquery.url);
+              this.$.apiquery.generateRequest();
+            }
+        }
+        // console.log(JSON.stringify(request.detail.response));
+        // console.log(this.nodeStates);
+      },
+      api_hosts_info: function(request) {
+/*
+var tmpdata = [];
+       console.log(this.nodeStates);
+       data.data[0].forEach(function(row){
+         console.log(tmpdata);
+         console.log(row.Node);
+         tmpdata.push({nodeName: row.Node,nodeAddress: row.Address});
+         console.log(tmpdata);
+       });
+       this.nodeStates = tmpdata;
+*/
+        var address = request.detail.response.ref[1];
+        var nodename = request.detail.response.ref[2];
+        data = request.detail.response.data[0];
+        // icon="{{item.nodeState}}" item-icon></iron-icon>Node: {{item.nodeName}}: {{item.nodeAddress}}
+        console.log(request.detail.response);
+        switch (request.detail.response.state[0]) {
+          case 2:
+            this.stateName="warning";
+            this.nodeStates.push({nodeState: "alert", nodeName: nodename, nodeAddress: address});
+            console.log(this.nodeStates);
+            this.serviceStates = [];
+            break;
+          case 1:
+            this.stateName="warning";
+            this.nodeStates.push({nodeState: "warning", nodeName: nodename, nodeAddress: address});
+            console.log(this.nodeStates);
+            this.serviceStates = [];
+            break;
+          default:
+            this.nodeStates.push({nodeState: "ok", nodeName: nodename, nodeAddress: address});
+            console.log(this.nodeStates);
+        }
+        console.log(JSON.stringify(request.detail.response));
+        console.log(this.nodeStates);
+      }
+    });
+  </script>
+
+</dom-module>

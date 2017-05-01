@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Control Panel</title>
+    <script type="text/javascript" src="bower_components/webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="bower_components/polymer/polymer.html">
+    <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
+    <link rel="import" href="bower_components/paper-drawer-panel/paper-drawer-panel.html">
+    <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
+    <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
+    <link rel="import" href="bower_components/paper-card/paper-card.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
+    <link rel="import" href="bower_components/paper-styles/paper-styles.html">
+    <link rel="import" href="bower_components/paper-item/paper-icon-item.html">
+    <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="components/base-panel/base-panel.html">
+    <link rel="import" href="components/status-panel/status-panel.html">
+    <link rel="import" href="components/menu-panel/menu-panel.html">
+    <link rel="stylesheet" href="index.css" type="text/css">
+  </head>
+  <body>
+    <paper-drawer-panel id="paperDrawerPanel" force-narrow>
+        <div drawer>
+          <paper-header-panel class="flex">
+            <paper-toolbar>
+              <paper-icon-button icon="close" paper-drawer-toggle></paper-icon-button>
+            </paper-toolbar>
+              <menu-panel></menu-panel>
+          </paper-header-panel>
+        </div>
+        <paper-header-panel main>
+          <paper-toolbar>
+            <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
+              <span class="title"><base-panel></base-panel></span>
+            <paper-icon-button icon="more-vert" on-tap="moreAction"></paper-icon-button>
+          </paper-toolbar>
+          <status-panel></status-panel>
+        </paper-header-panel>
+      </paper-drawer-panel>
+  </body>
+</html>

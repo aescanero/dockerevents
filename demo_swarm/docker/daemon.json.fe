@@ -1,0 +1,9 @@
+{
+  "labels": ["myproject.service=fe"],
+  "hosts": ["fd://","tcp://0.0.0.0:2376"], 
+  "tls": true,
+  "tlscacert": "/etc/docker/ssl/ca.pem",
+  "tlscert": "/etc/docker/ssl/apiserver.pem",
+  "tlskey": "/etc/docker/ssl/apiserver-key.pem",
+  "dns-search": []
+}
