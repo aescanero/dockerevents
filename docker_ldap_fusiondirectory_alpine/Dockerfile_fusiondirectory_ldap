@@ -30,12 +30,11 @@ RUN mkdir -p /svr/config && adduser -S openldap \
   && perl schema2ldif-master/bin/schema2ldif core-fd.schema >core-fd.ldif \
   && perl schema2ldif-master/bin/schema2ldif ldapns.schema >ldapns.ldif \
   && perl schema2ldif-master/bin/schema2ldif rfc2307bis.schema >rfc2307bis.ldif \
-  && perl schema2ldif-master/bin/schema2ldif template-fd.schema >template-fd.ldif
+  && perl schema2ldif-master/bin/schema2ldif template-fd.schema >template-fd.ldif \
   && ! /usr/sbin/slaptest -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d -Q 2>/dev/null \
   && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 0 -l core-fd.ldif \
   && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 0 -l core-fd-conf.ldif \
   && echo "ns" && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 0 -l ldapns.ldif \
-#  && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 0 -l rfc2307bis.ldif \
   && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 0 -l template-fd.ldif \
   && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 1 -l /etc/openldap/fd.ldif \
   && chown openldap /etc/openldap/slapd.d -R \
@@ -43,6 +42,8 @@ RUN mkdir -p /svr/config && adduser -S openldap \
   && chown openldap /var/run/openldap \
   && chmod u+x /usr/local/sbin/watcher.py \
   && rm -rf /var/cache/apk/*
+
+#  && /usr/sbin/slapadd -F /etc/openldap/slapd.d -n 0 -l rfc2307bis.ldif \
 
 
 WORKDIR /data
